@@ -1,10 +1,18 @@
-import { ChakraProvider, Container } from "@chakra-ui/react";
+import {
+  Box,
+  ChakraProvider,
+  Container,
+  Progress,
+  useColorMode,
+} from "@chakra-ui/react";
+import { useTheme } from "@emotion/react";
 import React, { Suspense } from "react";
 import { QueryClientProvider } from "react-query";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { AppBar } from "./components/lib.js";
 import { queryClient } from "./configs/queryClient.js";
-import { theme } from "./theme/index.js";
+import { theme } from "./configs/theme.js";
+
 const Countries = React.lazy(() =>
   import(/* webpackChunkName: "app" */ "./pages/countries")
 );
@@ -13,23 +21,34 @@ const Country = React.lazy(() =>
 );
 
 function Routes() {
+  const { colors, sizes } = useTheme();
+  const { colorMode } = useColorMode();
   return (
-    <Suspense fallback={<>preloader</>}>
+    <Suspense fallback={<Progress size="xs" isIndeterminate />}>
       <Router>
-        <div>
-          <nav>
-            <AppBar />
-          </nav>
+        <Box
+          backgroundColor={
+            colorMode === "dark" ? colors.darkBlue : colors.lightGray
+          }
+          height="100vh"
+        >
+          <Container maxW={sizes.maxWidth}>
+            <div>
+              <nav>
+                <AppBar />
+              </nav>
 
-          <Switch>
-            <Route exact path="/">
-              <Countries />
-            </Route>
-            <Route path="/:name">
-              <Country />
-            </Route>
-          </Switch>
-        </div>
+              <Switch>
+                <Route exact path="/">
+                  <Countries />
+                </Route>
+                <Route path="/:id">
+                  <Country />
+                </Route>
+              </Switch>
+            </div>
+          </Container>
+        </Box>
       </Router>
     </Suspense>
   );
@@ -38,9 +57,7 @@ function Routes() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ChakraProvider theme={theme}>
-      <Container maxW="1440px">
-        <Routes />
-      </Container>
+      <Routes />
     </ChakraProvider>
   </QueryClientProvider>
 );
